@@ -24,7 +24,7 @@ Download `noticer.exe` from [Releases](https://github.com/vivainio/Noticer/relea
 Install the Python client with [uv](https://docs.astral.sh/uv/):
 
 ```
-uv tool install noticer-push
+uv tool install "noticer-push @ git+https://github.com/vivainio/Noticer.git#subdirectory=noticer-push"
 ```
 
 ### Basic usage
