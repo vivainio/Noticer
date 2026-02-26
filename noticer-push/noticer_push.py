@@ -13,6 +13,7 @@ Levels: info (default), warn, error, success
 
 import argparse
 import json
+import os
 import socket
 import sys
 
@@ -61,7 +62,10 @@ def main() -> None:
         hook = json.load(sys.stdin)
         event = hook.get("hook_event_name", "Event")
         title = hook.get("title") or event
-        message = hook.get("message") or hook.get("cwd") or ""
+        cwd = hook.get("cwd", "")
+        session = os.path.basename(cwd) if cwd else ""
+        base_message = hook.get("message") or event
+        message = f"{base_message} [{session}]" if session else base_message
         level = args.level
     else:
         if not args.title or not args.message:
