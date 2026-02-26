@@ -37,6 +37,40 @@ DEFAULT_HOST = _default_host()
 DEFAULT_PORT = 49152
 
 
+CLAUDE_HOOKS = {
+    "Notification": [{"matcher": "", "hooks": [{"type": "command", "command": "noticer-push --claude-hook"}]}],
+    "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "noticer-push --claude-hook"}]}],
+    "PermissionRequest": [{"matcher": "", "hooks": [{"type": "command", "command": "noticer-push --claude-hook"}]}],
+    "Stop": [{"matcher": "", "hooks": [{"type": "command", "command": "noticer-push --claude-hook"}]}],
+}
+
+
+def _claude_hooks(mode: str) -> None:
+    if mode == "local":
+        settings_path = os.path.join(os.getcwd(), ".claude", "settings.json")
+    else:
+        settings_path = os.path.expanduser("~/.claude/settings.json")
+
+    if os.path.exists(settings_path):
+        with open(settings_path) as f:
+            settings = json.load(f)
+    else:
+        os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+        settings = {}
+
+    if mode == "uninstall":
+        settings.pop("hooks", None)
+        verb = "Uninstalled hooks from"
+    else:
+        settings["hooks"] = CLAUDE_HOOKS
+        verb = "Installed hooks into"
+
+    with open(settings_path, "w") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
+    print(f"{verb} {settings_path}")
+
+
 def send_notification(title: str, message: str, level: str = "info",
                       source: str | None = None,
                       transient: bool = False,
@@ -85,10 +119,15 @@ def main() -> None:
         action="store_true",
         help="Render as a compact single-row card",
     )
+    parser.add_argument("--claude-hooks", choices=["global", "local", "uninstall"], help="Install or uninstall Claude Code hooks")
     parser.add_argument("--host", default=DEFAULT_HOST, help=f"Host (default: {DEFAULT_HOST})")
     parser.add_argument("--port", "-p", type=int, default=DEFAULT_PORT, help=f"Port (default: {DEFAULT_PORT})")
 
     args = parser.parse_args()
+
+    if args.claude_hooks:
+        _claude_hooks(args.claude_hooks)
+        return
 
     if args.hook:
         hook = json.load(sys.stdin)
