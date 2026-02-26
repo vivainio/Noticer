@@ -1,63 +1,60 @@
 # Noticer
 
-A lightweight Windows notification viewer with a transparent, always-on-top panel. Send notifications from Python (or any TCP client) and see them grouped by source in a floating overlay.
-
-![Noticer](https://github.com/vivainio/Noticer/raw/master/docs/screenshot.png)
+A lightweight Windows notification overlay app. Receives notifications over UDP and displays them as cards in a persistent, scrollable window.
 
 ## Features
 
 - Transparent background — only the notification cards are visible
 - Notifications grouped by **source** under collapsible headers
 - Color-coded levels: `info`, `warn`, `error`, `success`
-- Pin button to keep the window always on top
-- Draggable from the toolbar or any card
-- System tray icon with unread count
+- Pin mode 📌 — borderless always-on-top overlay, normal resizable window otherwise
+- Draggable from the toolbar or any empty area
+- Tiny binary (~24 KB) — targets .NET Framework 4.8, pre-installed on Windows 10/11
 
-## Getting started
+## Requirements
 
-### Run the app
+Windows 10 or 11 (.NET Framework 4.8 is pre-installed — no separate runtime needed).
 
-Requires [.NET 8 SDK](https://dotnet.microsoft.com/download).
+## Installation
 
-```bash
-dotnet run --project Noticer
+Download `noticer.exe` from [Releases](https://github.com/vivainio/Noticer/releases) and run it.
+
+## Sending notifications
+
+Install the Python client with [uv](https://docs.astral.sh/uv/):
+
+```
+uv tool install noticer-push
 ```
 
-### Send a notification
+Or with pip:
 
-Install the CLI globally with [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv tool install ./noticer-push
+```
+pip install noticer-push
 ```
 
-Then use from anywhere:
+### Basic usage
 
-```bash
+```
 noticer-push "Title" "Message"
 noticer-push "Build failed" "Exit code 1" --level error
 noticer-push "Deploy done" "v1.2.0 is live" --level success --source "CI"
 ```
 
-#### All options
+Levels: `info` (default), `warn`, `error`, `success`
 
-```
-usage: noticer-push [-h] [--level {info,warn,warning,error,success}]
-                    [--source SOURCE] [--host HOST] [--port PORT]
-                    title message
+### All options
 
-positional arguments:
-  title       Notification title
-  message     Notification message
+| Flag | Description |
+|------|-------------|
+| `--level`, `-l` | Notification level |
+| `--source`, `-s` | Group notifications under a collapsible source header |
+| `--slim` | Compact single-row card |
+| `--transient` | Removed when any new message arrives in the same group |
+| `--host` | Target host (default: `127.0.0.1`, auto-detected in WSL) |
+| `--port`, `-p` | Target port (default: `49152`) |
 
-options:
-  -l, --level   Severity level (default: info)
-  -s, --source  Group notifications under this source name
-  --host        Target host (default: 127.0.0.1)
-  -p, --port    Target port (default: 49152)
-```
-
-#### From Python code
+### From Python
 
 ```python
 from noticer_push import send_notification
@@ -65,15 +62,50 @@ from noticer_push import send_notification
 send_notification("Job done", "Processed 1000 rows", level="success", source="ETL")
 ```
 
-## Protocol
+## Claude Code integration
 
-Newline-delimited JSON over TCP on `localhost:49152`:
+Noticer integrates with [Claude Code](https://github.com/anthropics/claude-code) hooks to show live activity — tool calls, permission requests, and completion notifications.
 
-```json
-{"title": "Hello", "message": "World", "level": "info", "source": "MyApp"}
+Install hooks globally:
+
+```
+noticer-push --claude-hooks global
 ```
 
-`source` is optional. Any TCP client can send notifications.
+Or for the current project only:
+
+```
+noticer-push --claude-hooks local
+```
+
+Uninstall:
+
+```
+noticer-push --claude-hooks uninstall
+```
+
+## Protocol
+
+Notifications are sent as UTF-8 UDP packets with `key=value` lines:
+
+```
+title=Deploy failed
+message=Pod crashed in prod
+level=error
+source=myapp
+```
+
+Optional fields: `source`, `transient=true`, `slim=true`
+
+Any language that can send a UDP packet can send notifications to Noticer.
+
+## Building from source
+
+Requires [.NET SDK](https://dotnet.microsoft.com/download).
+
+```
+dotnet run --project Noticer
+```
 
 ## License
 

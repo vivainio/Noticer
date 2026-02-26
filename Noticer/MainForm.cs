@@ -9,8 +9,8 @@ public class MainForm : Form
     private readonly FlowLayoutPanel _listPanel;
     private readonly Button _clearButton;
     private readonly Icon _appIcon;
-    private readonly Panel _bottomEdge;
     private readonly List<(Label Label, NotificationItem Item)> _timeLabels = new();
+    private readonly Panel _cornerMarker;
 
     // source name → group panel
     private readonly Dictionary<string, SourceGroup> _sourceGroups = new();
@@ -60,15 +60,12 @@ public class MainForm : Form
         {
             Text = "🗑",
             FlatStyle = FlatStyle.Flat,
-            ForeColor = Color.FromArgb(160, 160, 180),
-            BackColor = Color.FromArgb(80, 80, 100),
-            Size = new Size(36, 28),
-            Top = 4,
-            Anchor = AnchorStyles.Right | AnchorStyles.Top,
-            FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
+            ForeColor = Color.FromArgb(140, 140, 160),
+            BackColor = Color.FromArgb(60, 60, 80),
+            Size = new Size(36, 30),
+            Anchor = AnchorStyles.Right | AnchorStyles.Bottom,
+            FlatAppearance = { BorderSize = 0 },
         };
-        _clearButton.Left = toolbar.ClientSize.Width - _clearButton.Width - 8;
-        _clearButton.Anchor = AnchorStyles.Right | AnchorStyles.Top;
         _clearButton.Click += (_, _) => ClearAll();
 
         var pinButton = new Button
@@ -82,7 +79,7 @@ public class MainForm : Form
             Anchor = AnchorStyles.Right | AnchorStyles.Top,
             FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
         };
-        pinButton.Left = toolbar.ClientSize.Width - _clearButton.Width - pinButton.Width - 16;
+        pinButton.Left = toolbar.ClientSize.Width - pinButton.Width - 8;
         pinButton.Anchor = AnchorStyles.Right | AnchorStyles.Top;
         pinButton.Click += (_, _) =>
         {
@@ -90,11 +87,9 @@ public class MainForm : Form
             pinButton.ForeColor = TopMost ? Color.White : Color.FromArgb(160, 160, 180);
             pinButton.BackColor = TopMost ? Color.FromArgb(80, 100, 140) : Color.FromArgb(80, 80, 100);
             FormBorderStyle = TopMost ? FormBorderStyle.None : FormBorderStyle.Sizable;
-            _bottomEdge.Visible = TopMost;
-            if (TopMost) _bottomEdge.BringToFront();
         };
 
-        toolbar.Controls.AddRange([pinButton, _clearButton]);
+        toolbar.Controls.Add(pinButton);
         Controls.Add(toolbar);
 
         // ── Scrollable notification list ─────────────────────────
@@ -124,14 +119,28 @@ public class MainForm : Form
         scroll.Controls.Add(_listPanel);
         Controls.Add(scroll);
 
-        _bottomEdge = new Panel
+        _clearButton.Left = ClientSize.Width - _clearButton.Width - 2;
+        _clearButton.Top = ClientSize.Height - _clearButton.Height - 2;
+        Controls.Add(_clearButton);
+        _clearButton.BringToFront();
+
+        const int cornerSize = 20;
+        _cornerMarker = new Panel
         {
-            Dock = DockStyle.Bottom,
-            Height = 3,
-            BackColor = Color.FromArgb(80, 100, 160),
-            Visible = false,
+            Size = new Size(cornerSize, cornerSize),
+            BackColor = Color.Transparent,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
         };
-        Controls.Add(_bottomEdge);
+        _cornerMarker.Left = 2;
+        _cornerMarker.Top = ClientSize.Height - cornerSize - 2;
+        _cornerMarker.Paint += (_, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(140, 140, 160), 2);
+            e.Graphics.DrawLine(pen, 0, 0, 0, cornerSize - 1);   // left vertical
+            e.Graphics.DrawLine(pen, 0, cornerSize - 1, cornerSize - 1, cornerSize - 1); // bottom horizontal
+        };
+        Controls.Add(_cornerMarker);
+        _cornerMarker.BringToFront();
 
         // ── Listener ─────────────────────────────────────────────
         _listener = new NotificationListener();
@@ -211,6 +220,7 @@ public class MainForm : Form
         }
 
         _listPanel.Width = _listPanel.Parent?.ClientSize.Width ?? _listPanel.Width;
+        UpdateCornerMarker();
     }
 
     private Panel BuildCard(NotificationItem item)
@@ -330,11 +340,17 @@ public class MainForm : Form
         panel.ResumeLayout();
     }
 
+    private void UpdateCornerMarker()
+    {
+        _cornerMarker.Visible = _listPanel.Controls.Count == 0;
+    }
+
     private void ClearAll()
     {
         _listPanel.Controls.Clear();
         _sourceGroups.Clear();
         _timeLabels.Clear();
+        UpdateCornerMarker();
     }
 
 
