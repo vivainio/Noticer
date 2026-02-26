@@ -25,11 +25,9 @@ dotnet run --project Noticer
 
 ### Send a notification
 
-Install the CLI globally with [pipx](https://pipx.pypa.io) or [uv](https://docs.astral.sh/uv/):
+Install the CLI globally with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pipx install ./noticer-push
-# or
 uv tool install ./noticer-push
 ```
 
