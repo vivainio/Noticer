@@ -9,6 +9,7 @@ public class MainForm : Form
     private readonly FlowLayoutPanel _listPanel;
     private readonly Button _clearButton;
     private readonly NotifyIcon _trayIcon;
+    private readonly Icon _appIcon;
     private int _unreadCount = 0;
     private readonly List<(Label Label, NotificationItem Item)> _timeLabels = new();
 
@@ -35,7 +36,9 @@ public class MainForm : Form
 
     public MainForm()
     {
+        _appIcon = CreateAppIcon();
         Text = "Noticer";
+        Icon = _appIcon;
         Size = new Size(480, 600);
         MinimumSize = new Size(300, 300);
         Font = new Font("Segoe UI", 9f);
@@ -134,7 +137,7 @@ public class MainForm : Form
         _trayIcon = new NotifyIcon
         {
             Text = "Noticer",
-            Icon = SystemIcons.Information,
+            Icon = _appIcon,
             Visible = true,
         };
         var trayMenu = new ContextMenuStrip();
@@ -398,8 +401,56 @@ public class MainForm : Form
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { _listener.Dispose(); _trayIcon.Dispose(); }
+        if (disposing) { _listener.Dispose(); _trayIcon.Dispose(); _appIcon.Dispose(); }
         base.Dispose(disposing);
+    }
+
+    private static Icon CreateAppIcon()
+    {
+        using var bmp = new Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        using var g = Graphics.FromImage(bmp);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.Clear(Color.Transparent);
+
+        // Blue rounded-square background
+        using var bgBrush = new SolidBrush(Color.FromArgb(60, 110, 220));
+        using var bgPath = RoundedRect(new Rectangle(0, 0, 32, 32), 7);
+        g.FillPath(bgBrush, bgPath);
+
+        // White bell shape
+        using var wb = new SolidBrush(Color.White);
+
+        // Handle (small oval at top)
+        g.FillEllipse(wb, 13, 3, 6, 4);
+
+        // Bell dome (filled arc + trapezoid body)
+        using var bellPath = new System.Drawing.Drawing2D.GraphicsPath();
+        bellPath.AddArc(7, 6, 18, 15, 180, 180);
+        bellPath.AddLine(25, 14, 26, 21);
+        bellPath.AddLine(26, 21, 6, 21);
+        bellPath.AddLine(6, 21, 7, 14);
+        bellPath.CloseFigure();
+        g.FillPath(wb, bellPath);
+
+        // Bottom rim
+        g.FillRectangle(wb, 5, 20, 22, 3);
+
+        // Clapper
+        g.FillEllipse(wb, 13, 23, 6, 5);
+
+        return Icon.FromHandle(bmp.GetHicon());
+    }
+
+    private static System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle b, int r)
+    {
+        var p = new System.Drawing.Drawing2D.GraphicsPath();
+        int d = r * 2;
+        p.AddArc(b.X, b.Y, d, d, 180, 90);
+        p.AddArc(b.Right - d, b.Y, d, d, 270, 90);
+        p.AddArc(b.Right - d, b.Bottom - d, d, d, 0, 90);
+        p.AddArc(b.X, b.Bottom - d, d, d, 90, 90);
+        p.CloseFigure();
+        return p;
     }
 }
 
