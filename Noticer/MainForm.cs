@@ -52,20 +52,8 @@ public class MainForm : Form
         var toolbar = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 44,
-            BackColor = Color.FromArgb(40, 40, 50),
-        };
-
-        var titleLabel = new Label
-        {
-            Text = "Noticer",
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 11f, FontStyle.Bold),
-            AutoSize = true,
-            TextAlign = ContentAlignment.MiddleLeft,
-            Top = 0,
-            Height = 44,
-            Left = 12,
+            Height = 36,
+            BackColor = chromaKey,
         };
 
         _clearButton = new Button
@@ -75,7 +63,7 @@ public class MainForm : Form
             ForeColor = Color.White,
             BackColor = Color.FromArgb(80, 80, 100),
             Size = new Size(80, 28),
-            Top = 8,
+            Top = 4,
             Anchor = AnchorStyles.Right | AnchorStyles.Top,
             FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
         };
@@ -90,7 +78,7 @@ public class MainForm : Form
             ForeColor = Color.FromArgb(160, 160, 180),
             BackColor = Color.FromArgb(80, 80, 100),
             Size = new Size(36, 28),
-            Top = 8,
+            Top = 4,
             Anchor = AnchorStyles.Right | AnchorStyles.Top,
             FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
         };
@@ -103,13 +91,13 @@ public class MainForm : Form
             pinButton.BackColor = TopMost ? Color.FromArgb(80, 100, 140) : Color.FromArgb(80, 80, 100);
         };
 
-        toolbar.Controls.AddRange([titleLabel, pinButton, _clearButton]);
+        toolbar.Controls.AddRange([pinButton, _clearButton]);
         Controls.Add(toolbar);
 
         // ── Scrollable notification list ─────────────────────────
         // Explicitly positioned below the toolbar instead of Dock=Fill
         // to avoid scroll starting at y=0 under the toolbar.
-        const int toolbarH = 44;
+        const int toolbarH = 36;
         var scroll = new Panel
         {
             Location = new Point(0, toolbarH),
