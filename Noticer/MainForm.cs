@@ -384,8 +384,7 @@ public class MainForm : Form
     private static string HumanizeAge(DateTime t)
     {
         var age = DateTime.Now - t;
-        if (age.TotalSeconds < 10)  return "just now";
-        if (age.TotalMinutes < 1)   return $"{(int)age.TotalSeconds}s ago";
+        if (age.TotalMinutes < 1)   return "";
         if (age.TotalHours < 1)     return $"{(int)age.TotalMinutes}m ago";
         if (age.TotalDays < 1)      return $"{(int)age.TotalHours}h ago";
         return $"{(int)age.TotalDays}d ago";
