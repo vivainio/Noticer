@@ -80,7 +80,16 @@ def main() -> None:
         cwd = hook.get("cwd", "")
         args.source = os.path.basename(cwd) if cwd else args.source
 
-        if event == "PermissionRequest":
+        if event == "PreToolUse":
+            tool = hook.get("tool_name", "tool")
+            tool_input = hook.get("tool_input") or {}
+            command = tool_input.get("command") or tool_input.get("path") or str(tool_input)
+            title = tool
+            message = command
+            level = "info"
+            args.transient = True
+            args.slim = True
+        elif event == "PermissionRequest":
             tool = hook.get("tool_name", "tool")
             tool_input = hook.get("tool_input") or {}
             detail = tool_input.get("command") or tool_input.get("path") or str(tool_input)
