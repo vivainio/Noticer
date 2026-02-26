@@ -19,7 +19,7 @@ import sys
 
 
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 5556
+DEFAULT_PORT = 49152
 
 
 def send_notification(title: str, message: str, level: str = "info",

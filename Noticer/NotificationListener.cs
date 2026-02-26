@@ -11,7 +11,7 @@ public class NotificationListener : IDisposable
     private CancellationTokenSource? _cts;
     private Task? _listenTask;
 
-    public const int Port = 5556;
+    public const int Port = 49152;
 
     public event Action<NotificationItem>? NotificationReceived;
 
