@@ -5,8 +5,8 @@ noticer-push - Send notifications to the Noticer app.
 Usage:
     noticer-push "Title" "Message"
     noticer-push "Title" "Message" --level warn
-    noticer-push "Title" "Message" --level error
     noticer-push "Title" "Message" --level success --source "MyApp"
+    noticer-push --hook --source "Claude Code"   # reads Claude Code hook JSON from stdin
 
 Levels: info (default), warn, error, success
 """
@@ -14,6 +14,7 @@ Levels: info (default), warn, error, success
 import argparse
 import json
 import socket
+import sys
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -33,8 +34,8 @@ def send_notification(title: str, message: str, level: str = "info",
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Send a notification to Noticer.")
-    parser.add_argument("title", help="Notification title")
-    parser.add_argument("message", help="Notification message")
+    parser.add_argument("title", nargs="?", help="Notification title")
+    parser.add_argument("message", nargs="?", help="Notification message")
     parser.add_argument(
         "--level", "-l",
         default="info",
@@ -46,12 +47,31 @@ def main() -> None:
         default=None,
         help="Source name — groups notifications under a collapsible header",
     )
+    parser.add_argument(
+        "--hook",
+        action="store_true",
+        help="Read Claude Code hook JSON from stdin and use its fields as title/message",
+    )
     parser.add_argument("--host", default=DEFAULT_HOST, help=f"Host (default: {DEFAULT_HOST})")
     parser.add_argument("--port", "-p", type=int, default=DEFAULT_PORT, help=f"Port (default: {DEFAULT_PORT})")
 
     args = parser.parse_args()
-    send_notification(args.title, args.message, args.level, args.source, args.host, args.port)
-    print(f"[{args.level.upper()}] {args.title}: {args.message}")
+
+    if args.hook:
+        hook = json.load(sys.stdin)
+        event = hook.get("hook_event_name", "Event")
+        title = hook.get("title") or event
+        message = hook.get("message") or hook.get("cwd") or ""
+        level = args.level
+    else:
+        if not args.title or not args.message:
+            parser.error("title and message are required unless --hook is used")
+        title = args.title
+        message = args.message
+        level = args.level
+
+    send_notification(title, message, level, args.source, args.host, args.port)
+    print(f"[{level.upper()}] {title}: {message}")
 
 
 if __name__ == "__main__":
