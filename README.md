@@ -27,12 +27,6 @@ Install the Python client with [uv](https://docs.astral.sh/uv/):
 uv tool install noticer-push
 ```
 
-Or with pip:
-
-```
-pip install noticer-push
-```
-
 ### Basic usage
 
 ```
