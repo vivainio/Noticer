@@ -187,6 +187,13 @@ public class MainForm : Form
         if (dupe != null) panel.Controls.Remove(dupe);
     }
 
+    private static void RemoveTransients(FlowLayoutPanel panel)
+    {
+        foreach (var c in panel.Controls.OfType<Panel>()
+            .Where(c => c.Tag is NotificationItem n && n.Transient).ToList())
+            panel.Controls.Remove(c);
+    }
+
     private void AddNotification(NotificationItem item)
     {
         _unreadCount++;
@@ -196,6 +203,7 @@ public class MainForm : Form
 
         if (string.IsNullOrWhiteSpace(item.Source))
         {
+            RemoveTransients(_listPanel);
             RemoveDuplicate(_listPanel, item);
             InsertAtTop(_listPanel, card);
         }
@@ -413,7 +421,11 @@ internal class SourceGroup
 
     public void AddCard(Panel card)
     {
-        // Remove existing card with same title+message
+        // Remove transients and duplicates before inserting
+        var transients = _body.Controls.OfType<Panel>()
+            .Where(c => c.Tag is NotificationItem n && n.Transient).ToList();
+        foreach (var t in transients) { _body.Controls.Remove(t); _count--; }
+
         if (card.Tag is NotificationItem item)
         {
             var dupe = _body.Controls.OfType<Panel>()

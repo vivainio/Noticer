@@ -16,5 +16,8 @@ public class NotificationItem
     [JsonPropertyName("source")]
     public string? Source { get; set; }
 
+    [JsonPropertyName("transient")]
+    public bool Transient { get; set; }
+
     public DateTime ReceivedAt { get; set; } = DateTime.Now;
 }
