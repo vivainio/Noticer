@@ -227,11 +227,10 @@ public class MainForm : Form
     {
         var level = item.Level.ToLowerInvariant();
         var bgColor = LevelColors.TryGetValue(level, out var bg) ? bg : Color.FromArgb(235, 235, 240);
-        var borderColor = LevelBorderColors.TryGetValue(level, out var bc) ? bc : Color.LightGray;
 
         int cardWidth = _listPanel.ClientSize.Width - 16;
 
-        if (item.Slim)
+        if (item.Slim || string.IsNullOrWhiteSpace(item.Message))
         {
             var card = new Panel
             {
@@ -243,22 +242,13 @@ public class MainForm : Form
                 Tag = item,
             };
 
-            var levelBadge = new Label
-            {
-                Text = item.Level.ToUpperInvariant(),
-                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-                ForeColor = borderColor,
-                AutoSize = true,
-                Location = new Point(6, 6),
-            };
-
             var titleLabel = new Label
             {
-                Text = string.IsNullOrEmpty(item.Message) ? item.Title : $"{item.Title}: {item.Message}",
+                Text = item.Title,
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.FromArgb(30, 30, 40),
                 AutoSize = true,
-                Location = new Point(levelBadge.Left + levelBadge.PreferredWidth + 6, 6),
+                Location = new Point(6, 6),
             };
 
             var timeLabel = new Label
@@ -266,33 +256,26 @@ public class MainForm : Form
                 Text = HumanizeAge(item.ReceivedAt),
                 Font = new Font("Segoe UI", 7.5f),
                 ForeColor = Color.Gray,
-                AutoSize = true,
+                AutoSize = false,
+                Size = new Size(60, 16),
+                TextAlign = ContentAlignment.MiddleRight,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
             };
-            timeLabel.Location = new Point(card.Width - timeLabel.PreferredWidth - 6, 7);
+            timeLabel.Location = new Point(card.Width - timeLabel.Width - 4, 6);
             _timeLabels.Add((timeLabel, item));
 
-            card.Controls.AddRange([levelBadge, titleLabel, timeLabel]);
+            card.Controls.AddRange([titleLabel, timeLabel]);
             return card;
         }
 
         var card2 = new Panel
         {
             Width = cardWidth,
-            Height = 76,
+            Height = 60,
             Margin = new Padding(0, 0, 0, 4),
             BackColor = bgColor,
             BorderStyle = BorderStyle.FixedSingle,
             Tag = item,
-        };
-
-        var levelBadge2 = new Label
-        {
-            Text = item.Level.ToUpperInvariant(),
-            Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-            ForeColor = borderColor,
-            AutoSize = true,
-            Location = new Point(8, 5),
         };
 
         var timeLabel2 = new Label
@@ -300,10 +283,12 @@ public class MainForm : Form
             Text = HumanizeAge(item.ReceivedAt),
             Font = new Font("Segoe UI", 7.5f),
             ForeColor = Color.Gray,
-            AutoSize = true,
+            AutoSize = false,
+            Size = new Size(60, 16),
+            TextAlign = ContentAlignment.MiddleRight,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
         };
-        timeLabel2.Location = new Point(card2.Width - timeLabel2.PreferredWidth - 8, 5);
-        timeLabel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        timeLabel2.Location = new Point(card2.Width - timeLabel2.Width - 4, 4);
         _timeLabels.Add((timeLabel2, item));
 
         var titleLabel2 = new Label
@@ -312,7 +297,7 @@ public class MainForm : Form
             Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
             ForeColor = Color.FromArgb(30, 30, 40),
             AutoSize = false,
-            Location = new Point(8, 22),
+            Location = new Point(8, 6),
             Size = new Size(card2.Width - 16, 20),
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
         };
@@ -323,12 +308,12 @@ public class MainForm : Form
             Font = new Font("Segoe UI", 9f),
             ForeColor = Color.FromArgb(60, 60, 70),
             AutoSize = false,
-            Location = new Point(8, 42),
-            Size = new Size(card2.Width - 16, 28),
+            Location = new Point(8, 28),
+            Size = new Size(card2.Width - 16, 26),
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
         };
 
-        card2.Controls.AddRange([levelBadge2, timeLabel2, titleLabel2, msgLabel2]);
+        card2.Controls.AddRange([timeLabel2, titleLabel2, msgLabel2]);
         return card2;
     }
 

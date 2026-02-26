@@ -160,10 +160,10 @@ def main() -> None:
                 args.transient = True
                 args.slim = True
     else:
-        if not args.title or not args.message:
-            parser.error("title and message are required unless --hook is used")
+        if not args.title:
+            parser.error("title is required unless --hook is used")
         title = args.title
-        message = args.message
+        message = args.message or ""
         level = args.level
 
     send_notification(title, message, level, args.source, args.transient, args.slim, args.host, args.port)
