@@ -294,16 +294,6 @@ public class MainForm : Form
         }
     }
 
-    protected override void WndProc(ref Message m)
-    {
-        const int WM_NCHITTEST = 0x84;
-        const int HTCLIENT = 1;
-        const int HTCAPTION = 2;
-        base.WndProc(ref m);
-        if (m.Msg == WM_NCHITTEST && m.Result == HTCLIENT)
-            m.Result = HTCAPTION;
-    }
-
     protected override void Dispose(bool disposing)
     {
         if (disposing) { _listener.Dispose(); _trayIcon.Dispose(); }
