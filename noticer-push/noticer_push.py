@@ -152,13 +152,15 @@ def main() -> None:
             message = detail
             level = "warn"
             args.transient = True
+        elif event == "Stop":
+            title = "\u2713"
+            message = ""
+            level = "success"
+            args.transient = True
         else:
             title = hook.get("title") or event
-            message = hook.get("message") or ("\u2713" if event == "Stop" else event)
+            message = hook.get("message") or event
             level = args.level
-            if event == "Stop":
-                args.transient = True
-                args.slim = True
     else:
         if not args.title:
             parser.error("title is required unless --hook is used")
