@@ -258,7 +258,7 @@ public class MainForm : Form
 
             var titleLabel = new Label
             {
-                Text = item.Title,
+                Text = string.IsNullOrEmpty(item.Message) ? item.Title : $"{item.Title}: {item.Message}",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.FromArgb(30, 30, 40),
                 AutoSize = true,
