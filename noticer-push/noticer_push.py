@@ -25,12 +25,15 @@ DEFAULT_PORT = 49152
 def send_notification(title: str, message: str, level: str = "info",
                       source: str | None = None,
                       transient: bool = False,
+                      slim: bool = False,
                       host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     data: dict = {"title": title, "message": message, "level": level}
     if source:
         data["source"] = source
     if transient:
         data["transient"] = True
+    if slim:
+        data["slim"] = True
     payload = json.dumps(data).encode("utf-8")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         sock.sendto(payload, (host, port))
@@ -61,6 +64,11 @@ def main() -> None:
         action="store_true",
         help="Mark notification as transient — removed when any new message arrives in the same group",
     )
+    parser.add_argument(
+        "--slim",
+        action="store_true",
+        help="Render as a compact single-row card",
+    )
     parser.add_argument("--host", default=DEFAULT_HOST, help=f"Host (default: {DEFAULT_HOST})")
     parser.add_argument("--port", "-p", type=int, default=DEFAULT_PORT, help=f"Port (default: {DEFAULT_PORT})")
 
@@ -86,6 +94,7 @@ def main() -> None:
             level = args.level
             if event == "Stop":
                 args.transient = True
+                args.slim = True
     else:
         if not args.title or not args.message:
             parser.error("title and message are required unless --hook is used")
@@ -93,7 +102,7 @@ def main() -> None:
         message = args.message
         level = args.level
 
-    send_notification(title, message, level, args.source, args.transient, args.host, args.port)
+    send_notification(title, message, level, args.source, args.transient, args.slim, args.host, args.port)
     print(f"[{level.upper()}] {title}: {message}")
 
 

@@ -230,7 +230,51 @@ public class MainForm : Form
 
         int cardWidth = _listPanel.ClientSize.Width - (indent ? 36 : 16);
 
-        var card = new Panel
+        if (item.Slim)
+        {
+            var card = new Panel
+            {
+                Width = cardWidth,
+                Height = 28,
+                Margin = new Padding(indent ? 20 : 0, 0, 0, 2),
+                BackColor = bgColor,
+                BorderStyle = BorderStyle.FixedSingle,
+                Tag = item,
+            };
+
+            var levelBadge = new Label
+            {
+                Text = item.Level.ToUpperInvariant(),
+                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                ForeColor = borderColor,
+                AutoSize = true,
+                Location = new Point(6, 6),
+            };
+
+            var titleLabel = new Label
+            {
+                Text = item.Title,
+                Font = new Font("Segoe UI", 9f),
+                ForeColor = Color.FromArgb(30, 30, 40),
+                AutoSize = true,
+                Location = new Point(levelBadge.Left + levelBadge.PreferredWidth + 6, 6),
+            };
+
+            var timeLabel = new Label
+            {
+                Text = item.ReceivedAt.ToString("HH:mm:ss"),
+                Font = new Font("Segoe UI", 7.5f),
+                ForeColor = Color.Gray,
+                AutoSize = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+            };
+            timeLabel.Location = new Point(card.Width - timeLabel.PreferredWidth - 6, 7);
+
+            card.Controls.AddRange([levelBadge, titleLabel, timeLabel]);
+            return card;
+        }
+
+        var card2 = new Panel
         {
             Width = cardWidth,
             Height = 76,
@@ -240,7 +284,7 @@ public class MainForm : Form
             Tag = item,
         };
 
-        var levelBadge = new Label
+        var levelBadge2 = new Label
         {
             Text = item.Level.ToUpperInvariant(),
             Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
@@ -249,40 +293,40 @@ public class MainForm : Form
             Location = new Point(8, 5),
         };
 
-        var timeLabel = new Label
+        var timeLabel2 = new Label
         {
             Text = item.ReceivedAt.ToString("HH:mm:ss"),
             Font = new Font("Segoe UI", 7.5f),
             ForeColor = Color.Gray,
             AutoSize = true,
         };
-        timeLabel.Location = new Point(card.Width - timeLabel.PreferredWidth - 8, 5);
-        timeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        timeLabel2.Location = new Point(card2.Width - timeLabel2.PreferredWidth - 8, 5);
+        timeLabel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
-        var titleLabel = new Label
+        var titleLabel2 = new Label
         {
             Text = item.Title,
             Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
             ForeColor = Color.FromArgb(30, 30, 40),
             AutoSize = false,
             Location = new Point(8, 22),
-            Size = new Size(card.Width - 16, 20),
+            Size = new Size(card2.Width - 16, 20),
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
         };
 
-        var msgLabel = new Label
+        var msgLabel2 = new Label
         {
             Text = item.Message,
             Font = new Font("Segoe UI", 9f),
             ForeColor = Color.FromArgb(60, 60, 70),
             AutoSize = false,
             Location = new Point(8, 42),
-            Size = new Size(card.Width - 16, 28),
+            Size = new Size(card2.Width - 16, 28),
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
         };
 
-        card.Controls.AddRange([levelBadge, timeLabel, titleLabel, msgLabel]);
-        return card;
+        card2.Controls.AddRange([levelBadge2, timeLabel2, titleLabel2, msgLabel2]);
+        return card2;
     }
 
     private static void InsertAtTop(FlowLayoutPanel panel, Control control)
