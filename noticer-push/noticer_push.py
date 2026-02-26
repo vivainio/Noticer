@@ -63,7 +63,7 @@ def main() -> None:
         event = hook.get("hook_event_name", "Event")
         title = hook.get("title") or event
         cwd = hook.get("cwd", "")
-        message = hook.get("message") or event
+        message = hook.get("message") or ("Done" if event == "Stop" else event)
         args.source = os.path.basename(cwd) if cwd else args.source
         level = args.level
     else:
