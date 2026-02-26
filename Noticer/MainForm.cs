@@ -8,9 +8,7 @@ public class MainForm : Form
     private readonly NotificationListener _listener;
     private readonly FlowLayoutPanel _listPanel;
     private readonly Button _clearButton;
-    private readonly NotifyIcon _trayIcon;
     private readonly Icon _appIcon;
-    private int _unreadCount = 0;
     private readonly List<(Label Label, NotificationItem Item)> _timeLabels = new();
 
     // source name → group panel
@@ -39,6 +37,7 @@ public class MainForm : Form
         _appIcon = CreateAppIcon();
         Text = "Noticer";
         Icon = _appIcon;
+        FormBorderStyle = FormBorderStyle.SizableToolWindow;
         Size = new Size(480, 600);
         MinimumSize = new Size(300, 300);
         Font = new Font("Segoe UI", 9f);
@@ -58,11 +57,11 @@ public class MainForm : Form
 
         _clearButton = new Button
         {
-            Text = "Clear all",
+            Text = "🗑",
             FlatStyle = FlatStyle.Flat,
-            ForeColor = Color.White,
+            ForeColor = Color.FromArgb(160, 160, 180),
             BackColor = Color.FromArgb(80, 80, 100),
-            Size = new Size(80, 28),
+            Size = new Size(36, 28),
             Top = 4,
             Anchor = AnchorStyles.Right | AnchorStyles.Top,
             FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
@@ -121,19 +120,6 @@ public class MainForm : Form
         scroll.Controls.Add(_listPanel);
         Controls.Add(scroll);
 
-        // ── Tray icon ────────────────────────────────────────────
-        _trayIcon = new NotifyIcon
-        {
-            Text = "Noticer",
-            Icon = _appIcon,
-            Visible = true,
-        };
-        var trayMenu = new ContextMenuStrip();
-        trayMenu.Items.Add("Show", null, (_, _) => ShowWindow());
-        trayMenu.Items.Add("Exit", null, (_, _) => { _trayIcon.Visible = false; Application.Exit(); });
-        _trayIcon.ContextMenuStrip = trayMenu;
-        _trayIcon.DoubleClick += (_, _) => ShowWindow();
-
         // ── Listener ─────────────────────────────────────────────
         _listener = new NotificationListener();
         _listener.NotificationReceived += OnNotificationReceived;
@@ -153,7 +139,6 @@ public class MainForm : Form
         ticker.Tick += (_, _) => RefreshTimeLabels();
         ticker.Start();
 
-        FormClosing += OnFormClosing;
         Resize += OnResize;
     }
 
@@ -192,10 +177,7 @@ public class MainForm : Form
 
     private void AddNotification(NotificationItem item)
     {
-        _unreadCount++;
-        UpdateTrayText();
-
-        var card = BuildCard(item, indent: !string.IsNullOrWhiteSpace(item.Source));
+        var card = BuildCard(item);
 
         if (string.IsNullOrWhiteSpace(item.Source))
         {
@@ -218,13 +200,13 @@ public class MainForm : Form
         _listPanel.Width = _listPanel.Parent?.ClientSize.Width ?? _listPanel.Width;
     }
 
-    private Panel BuildCard(NotificationItem item, bool indent)
+    private Panel BuildCard(NotificationItem item)
     {
         var level = item.Level.ToLowerInvariant();
         var bgColor = LevelColors.GetValueOrDefault(level, Color.FromArgb(235, 235, 240));
         var borderColor = LevelBorderColors.GetValueOrDefault(level, Color.LightGray);
 
-        int cardWidth = _listPanel.ClientSize.Width - (indent ? 36 : 16);
+        int cardWidth = _listPanel.ClientSize.Width - 16;
 
         if (item.Slim)
         {
@@ -232,7 +214,7 @@ public class MainForm : Form
             {
                 Width = cardWidth,
                 Height = 28,
-                Margin = new Padding(indent ? 20 : 0, 0, 0, 2),
+                Margin = new Padding(0, 0, 0, 2),
                 BackColor = bgColor,
                 BorderStyle = BorderStyle.FixedSingle,
                 Tag = item,
@@ -275,7 +257,7 @@ public class MainForm : Form
         {
             Width = cardWidth,
             Height = 76,
-            Margin = new Padding(indent ? 20 : 0, 0, 0, 4),
+            Margin = new Padding(0, 0, 0, 4),
             BackColor = bgColor,
             BorderStyle = BorderStyle.FixedSingle,
             Tag = item,
@@ -340,37 +322,30 @@ public class MainForm : Form
         _listPanel.Controls.Clear();
         _sourceGroups.Clear();
         _timeLabels.Clear();
-        _unreadCount = 0;
-        UpdateTrayText();
     }
 
-    private void UpdateTrayText()
-    {
-        _trayIcon.Text = _unreadCount > 0 ? $"Noticer ({_unreadCount})" : "Noticer";
-    }
-
-    private void ShowWindow()
-    {
-        Show();
-        WindowState = FormWindowState.Normal;
-        Activate();
-        _unreadCount = 0;
-        UpdateTrayText();
-    }
 
     private void OnResize(object? sender, EventArgs e)
     {
-        if (WindowState == FormWindowState.Minimized) Hide();
+        if (WindowState == FormWindowState.Minimized) return;
+        ResizeCards();
     }
 
-    private void OnFormClosing(object? sender, FormClosingEventArgs e)
+    private void ResizeCards()
     {
-        if (e.CloseReason == CloseReason.UserClosing)
+        if (_listPanel.Parent == null) return;
+        int newWidth = _listPanel.Parent.ClientSize.Width;
+        _listPanel.Width = newWidth;
+
+        foreach (Control c in _listPanel.Controls)
         {
-            e.Cancel = true;
-            Hide();
+            if (c.Tag is NotificationItem)
+                c.Width = newWidth - 16;
+            else if (_sourceGroups.Values.FirstOrDefault(g => g.Container == c) is SourceGroup group)
+                group.Resize(newWidth);
         }
     }
+
 
     private static string HumanizeAge(DateTime t)
     {
@@ -389,7 +364,7 @@ public class MainForm : Form
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { _listener.Dispose(); _trayIcon.Dispose(); _appIcon.Dispose(); }
+        if (disposing) { _listener.Dispose(); _appIcon.Dispose(); }
         base.Dispose(disposing);
     }
 
@@ -523,6 +498,17 @@ internal class SourceGroup
         };
         Container.Controls.Add(_header);
         Container.Controls.Add(_body);
+    }
+
+    public void Resize(int listWidth)
+    {
+        int groupWidth = listWidth - 16;
+        Container.Width = groupWidth;
+        _header.Width = groupWidth;
+        _countLabel.Left = groupWidth - _countLabel.PreferredWidth - 10;
+        _body.Width = groupWidth;
+        foreach (var card in _body.Controls.OfType<Panel>())
+            card.Width = listWidth - 16;
     }
 
     public void AddCard(Panel card)
