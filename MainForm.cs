@@ -6,7 +6,6 @@ public class MainForm : Form
 {
     private readonly NotificationListener _listener;
     private readonly FlowLayoutPanel _listPanel;
-    private readonly Label _emptyLabel;
     private readonly Button _clearButton;
     private readonly NotifyIcon _trayIcon;
     private int _unreadCount = 0;
@@ -126,19 +125,7 @@ public class MainForm : Form
             BackColor = chromaKey,
         };
 
-        _emptyLabel = new Label
-        {
-            Text = "No notifications yet.\nSend one with notify.py.",
-            ForeColor = Color.Gray,
-            AutoSize = false,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI", 10f),
-            BackColor = chromaKey,
-        };
-
         scroll.Controls.Add(_listPanel);
-        scroll.Controls.Add(_emptyLabel);
         Controls.Add(scroll);
 
         // ── Tray icon ────────────────────────────────────────────
@@ -177,7 +164,6 @@ public class MainForm : Form
 
     private void AddNotification(NotificationItem item)
     {
-        _emptyLabel.Visible = false;
         _unreadCount++;
         UpdateTrayText();
 
@@ -277,7 +263,6 @@ public class MainForm : Form
         _listPanel.Controls.Clear();
         _sourceGroups.Clear();
         _unreadCount = 0;
-        _emptyLabel.Visible = true;
         UpdateTrayText();
     }
 
