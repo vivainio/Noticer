@@ -63,9 +63,8 @@ def main() -> None:
         event = hook.get("hook_event_name", "Event")
         title = hook.get("title") or event
         cwd = hook.get("cwd", "")
-        session = os.path.basename(cwd) if cwd else ""
-        base_message = hook.get("message") or event
-        message = f"{base_message} [{session}]" if session else base_message
+        message = hook.get("message") or event
+        args.source = os.path.basename(cwd) if cwd else args.source
         level = args.level
     else:
         if not args.title or not args.message:
