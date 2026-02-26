@@ -6,8 +6,7 @@ Usage:
     python notify.py "Title" "Message"
     python notify.py "Title" "Message" --level warn
     python notify.py "Title" "Message" --level error
-    python notify.py "Title" "Message" --level success
-    python notify.py --host 127.0.0.1 --port 5556 "Title" "Message"
+    python notify.py "Title" "Message" --level success --source "MyApp"
 
 Levels: info (default), warn, error, success
 """
@@ -15,7 +14,6 @@ Levels: info (default), warn, error, success
 import argparse
 import json
 import socket
-import sys
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -28,9 +26,9 @@ def send_notification(title: str, message: str, level: str = "info",
     data: dict = {"title": title, "message": message, "level": level}
     if source:
         data["source"] = source
-    payload = json.dumps(data)
-    with socket.create_connection((host, port), timeout=5) as sock:
-        sock.sendall((payload + "\n").encode("utf-8"))
+    payload = json.dumps(data).encode("utf-8")
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.sendto(payload, (host, port))
 
 
 def main() -> None:
@@ -52,19 +50,8 @@ def main() -> None:
     parser.add_argument("--port", "-p", type=int, default=DEFAULT_PORT, help=f"Port (default: {DEFAULT_PORT})")
 
     args = parser.parse_args()
-
-    try:
-        send_notification(args.title, args.message, args.level, args.source, args.host, args.port)
-        print(f"[{args.level.upper()}] {args.title}: {args.message}")
-    except ConnectionRefusedError:
-        print(f"Error: Noticer is not running on {args.host}:{args.port}", file=sys.stderr)
-        sys.exit(1)
-    except TimeoutError:
-        print(f"Error: Connection to {args.host}:{args.port} timed out", file=sys.stderr)
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+    send_notification(args.title, args.message, args.level, args.source, args.host, args.port)
+    print(f"[{args.level.upper()}] {args.title}: {args.message}")
 
 
 if __name__ == "__main__":
