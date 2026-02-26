@@ -25,20 +25,28 @@ dotnet run --project Noticer
 
 ### Send a notification
 
-Requires Python 3.8+. No dependencies.
+Install the CLI globally with [pipx](https://pipx.pypa.io) or [uv](https://docs.astral.sh/uv/):
 
 ```bash
-python notify.py "Title" "Message"
-python notify.py "Build failed" "Exit code 1" --level error
-python notify.py "Deploy done" "v1.2.0 is live" --level success --source "CI"
+pipx install ./noticer-push
+# or
+uv tool install ./noticer-push
+```
+
+Then use from anywhere:
+
+```bash
+noticer-push "Title" "Message"
+noticer-push "Build failed" "Exit code 1" --level error
+noticer-push "Deploy done" "v1.2.0 is live" --level success --source "CI"
 ```
 
 #### All options
 
 ```
-usage: notify.py [-h] [--level {info,warn,warning,error,success}]
-                 [--source SOURCE] [--host HOST] [--port PORT]
-                 title message
+usage: noticer-push [-h] [--level {info,warn,warning,error,success}]
+                    [--source SOURCE] [--host HOST] [--port PORT]
+                    title message
 
 positional arguments:
   title       Notification title
@@ -54,7 +62,7 @@ options:
 #### From Python code
 
 ```python
-from notify import send_notification
+from noticer_push import send_notification
 
 send_notification("Job done", "Processed 1000 rows", level="success", source="ETL")
 ```

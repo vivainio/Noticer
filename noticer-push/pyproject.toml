@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "noticer-push"
+version = "0.1.0"
+description = "Send desktop notifications to the Noticer app"
+requires-python = ">=3.8"
+
+[project.scripts]
+noticer-push = "noticer_push:main"
+
+[tool.hatch.build.targets.wheel]
+include = ["noticer_push.py"]

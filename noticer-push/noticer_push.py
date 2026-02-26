@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-notify.py - Send notifications to the Noticer app.
+noticer-push - Send notifications to the Noticer app.
 
 Usage:
-    python notify.py "Title" "Message"
-    python notify.py "Title" "Message" --level warn
-    python notify.py "Title" "Message" --level error
-    python notify.py "Title" "Message" --level success --source "MyApp"
+    noticer-push "Title" "Message"
+    noticer-push "Title" "Message" --level warn
+    noticer-push "Title" "Message" --level error
+    noticer-push "Title" "Message" --level success --source "MyApp"
 
 Levels: info (default), warn, error, success
 """
