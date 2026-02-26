@@ -6,7 +6,7 @@ Usage:
     noticer-push "Title" "Message"
     noticer-push "Title" "Message" --level warn
     noticer-push "Title" "Message" --level success --source "MyApp"
-    noticer-push --hook --source "Claude Code"   # reads Claude Code hook JSON from stdin
+    noticer-push --claude-hook                    # reads Claude Code hook JSON from stdin
 
 Levels: info (default), warn, error, success
 """
@@ -55,8 +55,9 @@ def main() -> None:
         help="Source name — groups notifications under a collapsible header",
     )
     parser.add_argument(
-        "--hook",
+        "--claude-hook",
         action="store_true",
+        dest="hook",
         help="Read Claude Code hook JSON from stdin and use its fields as title/message",
     )
     parser.add_argument(
