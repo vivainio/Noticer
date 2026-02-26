@@ -229,6 +229,7 @@ public class MainForm : Form
             Margin = new Padding(indent ? 20 : 0, 0, 0, 4),
             BackColor = bgColor,
             BorderStyle = BorderStyle.FixedSingle,
+            Tag = item,
         };
 
         var levelBadge = new Label
