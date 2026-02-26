@@ -37,8 +37,12 @@ public class MainForm : Form
         Text = "Noticer";
         Size = new Size(480, 600);
         MinimumSize = new Size(300, 300);
-        BackColor = Color.FromArgb(245, 245, 248);
         Font = new Font("Segoe UI", 9f);
+        // Use a specific color as the transparency key so the background
+        // becomes click-through while the cards remain fully opaque.
+        var chromaKey = Color.FromArgb(1, 2, 3);
+        BackColor = chromaKey;
+        TransparencyKey = chromaKey;
 
         // ── Toolbar ──────────────────────────────────────────────
         var toolbar = new Panel
@@ -75,7 +79,27 @@ public class MainForm : Form
         _clearButton.Anchor = AnchorStyles.Right | AnchorStyles.Top;
         _clearButton.Click += (_, _) => ClearAll();
 
-        toolbar.Controls.AddRange([titleLabel, _clearButton]);
+        var pinButton = new Button
+        {
+            Text = "📌",
+            FlatStyle = FlatStyle.Flat,
+            ForeColor = Color.FromArgb(160, 160, 180),
+            BackColor = Color.FromArgb(80, 80, 100),
+            Size = new Size(36, 28),
+            Top = 8,
+            Anchor = AnchorStyles.Right | AnchorStyles.Top,
+            FlatAppearance = { BorderColor = Color.FromArgb(120, 120, 140) },
+        };
+        pinButton.Left = toolbar.ClientSize.Width - _clearButton.Width - pinButton.Width - 16;
+        pinButton.Anchor = AnchorStyles.Right | AnchorStyles.Top;
+        pinButton.Click += (_, _) =>
+        {
+            TopMost = !TopMost;
+            pinButton.ForeColor = TopMost ? Color.White : Color.FromArgb(160, 160, 180);
+            pinButton.BackColor = TopMost ? Color.FromArgb(80, 100, 140) : Color.FromArgb(80, 80, 100);
+        };
+
+        toolbar.Controls.AddRange([titleLabel, pinButton, _clearButton]);
         Controls.Add(toolbar);
 
         // ── Scrollable notification list ─────────────────────────
@@ -88,7 +112,7 @@ public class MainForm : Form
             Size = new Size(ClientSize.Width, ClientSize.Height - toolbarH),
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
             AutoScroll = true,
-            BackColor = Color.FromArgb(245, 245, 248),
+            BackColor = chromaKey,
         };
 
         _listPanel = new FlowLayoutPanel
@@ -99,6 +123,7 @@ public class MainForm : Form
             WrapContents = false,
             Dock = DockStyle.Top,
             Padding = new Padding(8, 8, 8, 8),
+            BackColor = chromaKey,
         };
 
         _emptyLabel = new Label
@@ -109,6 +134,7 @@ public class MainForm : Form
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Fill,
             Font = new Font("Segoe UI", 10f),
+            BackColor = chromaKey,
         };
 
         scroll.Controls.Add(_listPanel);
