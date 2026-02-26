@@ -61,11 +61,20 @@ def main() -> None:
     if args.hook:
         hook = json.load(sys.stdin)
         event = hook.get("hook_event_name", "Event")
-        title = hook.get("title") or event
         cwd = hook.get("cwd", "")
-        message = hook.get("message") or ("Done" if event == "Stop" else event)
         args.source = os.path.basename(cwd) if cwd else args.source
-        level = args.level
+
+        if event == "PermissionRequest":
+            tool = hook.get("tool_name", "tool")
+            tool_input = hook.get("tool_input") or {}
+            detail = tool_input.get("command") or tool_input.get("path") or str(tool_input)
+            title = f"Permission: {tool}"
+            message = detail
+            level = "warn"
+        else:
+            title = hook.get("title") or event
+            message = hook.get("message") or ("Done" if event == "Stop" else event)
+            level = args.level
     else:
         if not args.title or not args.message:
             parser.error("title and message are required unless --hook is used")
