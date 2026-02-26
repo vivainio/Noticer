@@ -10,6 +10,7 @@ public class MainForm : Form
     private readonly Button _clearButton;
     private readonly NotifyIcon _trayIcon;
     private int _unreadCount = 0;
+    private readonly List<(Label Label, NotificationItem Item)> _timeLabels = new();
 
     // source name → group panel
     private readonly Dictionary<string, SourceGroup> _sourceGroups = new();
@@ -157,6 +158,10 @@ public class MainForm : Form
         scroll.MouseDown += OnDragMouseDown;
         _listPanel.MouseDown += OnDragMouseDown;
 
+        var ticker = new System.Windows.Forms.Timer { Interval = 30_000 };
+        ticker.Tick += (_, _) => RefreshTimeLabels();
+        ticker.Start();
+
         FormClosing += OnFormClosing;
         Resize += OnResize;
     }
@@ -262,13 +267,14 @@ public class MainForm : Form
 
             var timeLabel = new Label
             {
-                Text = item.ReceivedAt.ToString("HH:mm:ss"),
+                Text = HumanizeAge(item.ReceivedAt),
                 Font = new Font("Segoe UI", 7.5f),
                 ForeColor = Color.Gray,
                 AutoSize = true,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
             };
             timeLabel.Location = new Point(card.Width - timeLabel.PreferredWidth - 6, 7);
+            _timeLabels.Add((timeLabel, item));
 
             card.Controls.AddRange([levelBadge, titleLabel, timeLabel]);
             return card;
@@ -295,13 +301,14 @@ public class MainForm : Form
 
         var timeLabel2 = new Label
         {
-            Text = item.ReceivedAt.ToString("HH:mm:ss"),
+            Text = HumanizeAge(item.ReceivedAt),
             Font = new Font("Segoe UI", 7.5f),
             ForeColor = Color.Gray,
             AutoSize = true,
         };
         timeLabel2.Location = new Point(card2.Width - timeLabel2.PreferredWidth - 8, 5);
         timeLabel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _timeLabels.Add((timeLabel2, item));
 
         var titleLabel2 = new Label
         {
@@ -341,6 +348,7 @@ public class MainForm : Form
     {
         _listPanel.Controls.Clear();
         _sourceGroups.Clear();
+        _timeLabels.Clear();
         _unreadCount = 0;
         UpdateTrayText();
     }
@@ -371,6 +379,22 @@ public class MainForm : Form
             e.Cancel = true;
             Hide();
         }
+    }
+
+    private static string HumanizeAge(DateTime t)
+    {
+        var age = DateTime.Now - t;
+        if (age.TotalSeconds < 10)  return "just now";
+        if (age.TotalMinutes < 1)   return $"{(int)age.TotalSeconds}s ago";
+        if (age.TotalHours < 1)     return $"{(int)age.TotalMinutes}m ago";
+        if (age.TotalDays < 1)      return $"{(int)age.TotalHours}h ago";
+        return $"{(int)age.TotalDays}d ago";
+    }
+
+    private void RefreshTimeLabels()
+    {
+        foreach (var (label, item) in _timeLabels)
+            label.Text = HumanizeAge(item.ReceivedAt);
     }
 
     protected override void Dispose(bool disposing)
