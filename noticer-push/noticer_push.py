@@ -99,7 +99,7 @@ def main() -> None:
             args.transient = True
         else:
             title = hook.get("title") or event
-            message = hook.get("message") or ("Done" if event == "Stop" else event)
+            message = hook.get("message") or ("\u2713" if event == "Stop" else event)
             level = args.level
             if event == "Stop":
                 args.transient = True
@@ -112,7 +112,7 @@ def main() -> None:
         level = args.level
 
     send_notification(title, message, level, args.source, args.transient, args.slim, args.host, args.port)
-    print(f"[{level.upper()}] {title}: {message}")
+    sys.stdout.buffer.write(f"[{level.upper()}] {title}: {message}\n".encode("utf-8"))
 
 
 if __name__ == "__main__":
