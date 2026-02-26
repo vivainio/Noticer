@@ -76,14 +76,14 @@ def send_notification(title: str, message: str, level: str = "info",
                       transient: bool = False,
                       slim: bool = False,
                       host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
-    data: dict = {"title": title, "message": message, "level": level}
+    lines = [f"title={title}", f"message={message}", f"level={level}"]
     if source:
-        data["source"] = source
+        lines.append(f"source={source}")
     if transient:
-        data["transient"] = True
+        lines.append("transient=true")
     if slim:
-        data["slim"] = True
-    payload = json.dumps(data).encode("utf-8")
+        lines.append("slim=true")
+    payload = "\n".join(lines).encode("utf-8")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         sock.sendto(payload, (host, port))
 

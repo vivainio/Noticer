@@ -216,8 +216,8 @@ public class MainForm : Form
     private Panel BuildCard(NotificationItem item)
     {
         var level = item.Level.ToLowerInvariant();
-        var bgColor = LevelColors.GetValueOrDefault(level, Color.FromArgb(235, 235, 240));
-        var borderColor = LevelBorderColors.GetValueOrDefault(level, Color.LightGray);
+        var bgColor = LevelColors.TryGetValue(level, out var bg) ? bg : Color.FromArgb(235, 235, 240);
+        var borderColor = LevelBorderColors.TryGetValue(level, out var bc) ? bc : Color.LightGray;
 
         int cardWidth = _listPanel.ClientSize.Width - 16;
 

@@ -1,7 +1,5 @@
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
 
 namespace Noticer;
 
@@ -37,16 +35,17 @@ public class NotificationListener : IDisposable
         {
             try
             {
-                var result = await _udpClient.ReceiveAsync(ct);
-                var json = Encoding.UTF8.GetString(result.Buffer);
-                var item = JsonSerializer.Deserialize<NotificationItem>(json);
+                var result = await _udpClient.ReceiveAsync();
+                var text = Encoding.UTF8.GetString(result.Buffer);
+                var item = NotificationItem.Parse(text);
                 if (item != null)
                 {
                     item.ReceivedAt = DateTime.Now;
                     NotificationReceived?.Invoke(item);
                 }
             }
-            catch (OperationCanceledException) { break; }
+            catch (ObjectDisposedException) { break; }
+            catch (SocketException) { break; }
             catch { /* malformed packet, ignore */ }
         }
     }

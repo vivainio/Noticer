@@ -19,14 +19,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Publish
-        run: >
-          dotnet publish Noticer/noticer.csproj
-          -c Release
-          -r win-x64
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -o publish
+        run: dotnet publish Noticer/noticer.csproj -c Release -o publish
 
       - name: Upload asset
         run: gh release upload ${{ github.ref_name }} publish/noticer.exe
