@@ -179,6 +179,14 @@ public class MainForm : Form
         else AddNotification(item);
     }
 
+    private static void RemoveDuplicate(FlowLayoutPanel panel, NotificationItem item)
+    {
+        var dupe = panel.Controls.OfType<Panel>()
+            .FirstOrDefault(c => c.Tag is NotificationItem n
+                && n.Title == item.Title && n.Message == item.Message);
+        if (dupe != null) panel.Controls.Remove(dupe);
+    }
+
     private void AddNotification(NotificationItem item)
     {
         _unreadCount++;
@@ -188,6 +196,7 @@ public class MainForm : Form
 
         if (string.IsNullOrWhiteSpace(item.Source))
         {
+            RemoveDuplicate(_listPanel, item);
             InsertAtTop(_listPanel, card);
         }
         else
@@ -403,6 +412,15 @@ internal class SourceGroup
 
     public void AddCard(Panel card)
     {
+        // Remove existing card with same title+message
+        if (card.Tag is NotificationItem item)
+        {
+            var dupe = _body.Controls.OfType<Panel>()
+                .FirstOrDefault(c => c.Tag is NotificationItem n
+                    && n.Title == item.Title && n.Message == item.Message);
+            if (dupe != null) { _body.Controls.Remove(dupe); _count--; }
+        }
+
         _body.SuspendLayout();
         _body.Controls.Add(card);
         _body.Controls.SetChildIndex(card, 0);
