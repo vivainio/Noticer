@@ -37,7 +37,7 @@ public class MainForm : Form
         _appIcon = CreateAppIcon();
         Text = "Noticer";
         Icon = _appIcon;
-        FormBorderStyle = FormBorderStyle.SizableToolWindow;
+        FormBorderStyle = FormBorderStyle.Sizable;
         Size = new Size(480, 600);
         MinimumSize = new Size(300, 300);
         Font = new Font("Segoe UI", 9f);
@@ -88,6 +88,7 @@ public class MainForm : Form
             TopMost = !TopMost;
             pinButton.ForeColor = TopMost ? Color.White : Color.FromArgb(160, 160, 180);
             pinButton.BackColor = TopMost ? Color.FromArgb(80, 100, 140) : Color.FromArgb(80, 80, 100);
+            FormBorderStyle = TopMost ? FormBorderStyle.None : FormBorderStyle.Sizable;
         };
 
         toolbar.Controls.AddRange([pinButton, _clearButton]);
