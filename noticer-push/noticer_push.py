@@ -18,7 +18,22 @@ import socket
 import sys
 
 
-DEFAULT_HOST = "127.0.0.1"
+def _default_host() -> str:
+    if os.name == "nt" or "microsoft" not in os.uname().release.lower():
+        return "127.0.0.1"
+    try:
+        with open("/proc/net/route") as f:
+            for line in f:
+                parts = line.split()
+                if parts[1] == "00000000":  # default route
+                    h = parts[2]
+                    return f"{int(h[6:8],16)}.{int(h[4:6],16)}.{int(h[2:4],16)}.{int(h[0:2],16)}"
+    except OSError:
+        pass
+    return "127.0.0.1"
+
+
+DEFAULT_HOST = _default_host()
 DEFAULT_PORT = 49152
 
 
