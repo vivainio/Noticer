@@ -9,6 +9,7 @@ public class MainForm : Form
     private readonly FlowLayoutPanel _listPanel;
     private readonly Button _clearButton;
     private readonly Icon _appIcon;
+    private readonly Panel _bottomEdge;
     private readonly List<(Label Label, NotificationItem Item)> _timeLabels = new();
 
     // source name → group panel
@@ -89,6 +90,8 @@ public class MainForm : Form
             pinButton.ForeColor = TopMost ? Color.White : Color.FromArgb(160, 160, 180);
             pinButton.BackColor = TopMost ? Color.FromArgb(80, 100, 140) : Color.FromArgb(80, 80, 100);
             FormBorderStyle = TopMost ? FormBorderStyle.None : FormBorderStyle.Sizable;
+            _bottomEdge.Visible = TopMost;
+            if (TopMost) _bottomEdge.BringToFront();
         };
 
         toolbar.Controls.AddRange([pinButton, _clearButton]);
@@ -120,6 +123,15 @@ public class MainForm : Form
 
         scroll.Controls.Add(_listPanel);
         Controls.Add(scroll);
+
+        _bottomEdge = new Panel
+        {
+            Dock = DockStyle.Bottom,
+            Height = 3,
+            BackColor = Color.FromArgb(80, 100, 160),
+            Visible = false,
+        };
+        Controls.Add(_bottomEdge);
 
         // ── Listener ─────────────────────────────────────────────
         _listener = new NotificationListener();
