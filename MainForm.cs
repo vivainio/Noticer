@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Noticer;
 
@@ -152,8 +153,24 @@ public class MainForm : Form
                 "Noticer", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        MouseDown += OnDragMouseDown;
+        scroll.MouseDown += OnDragMouseDown;
+        _listPanel.MouseDown += OnDragMouseDown;
+
         FormClosing += OnFormClosing;
         Resize += OnResize;
+    }
+
+    [DllImport("user32.dll")] private static extern bool ReleaseCapture();
+    [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+
+    private void OnDragMouseDown(object? sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            ReleaseCapture();
+            SendMessage(Handle, 0xA1 /* WM_NCLBUTTONDOWN */, 2 /* HTCAPTION */, 0);
+        }
     }
 
     private void OnNotificationReceived(NotificationItem item)
