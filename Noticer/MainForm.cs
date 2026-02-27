@@ -166,6 +166,17 @@ public class MainForm : Form
 
     [DllImport("user32.dll")] private static extern bool ReleaseCapture();
     [DllImport("user32.dll")] private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+    [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    private static readonly IntPtr HWND_TOP      = IntPtr.Zero;
+    private static readonly IntPtr HWND_TOPMOST  = new IntPtr(-1);
+    private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+    private const uint SWP_NOMOVE     = 0x0002;
+    private const uint SWP_NOSIZE     = 0x0001;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+    private const int  SW_SHOWNOACTIVATE = 4;
 
     private void OnDragMouseDown(object? sender, MouseEventArgs e)
     {
@@ -199,6 +210,13 @@ public class MainForm : Form
 
     private void AddNotification(NotificationItem item)
     {
+        if (WindowState == FormWindowState.Minimized)
+            ShowWindow(Handle, SW_SHOWNOACTIVATE);
+        // Briefly go topmost then back — bypasses Windows foreground restrictions without stealing focus
+        SetWindowPos(Handle, HWND_TOPMOST,   0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        if (!TopMost)
+            SetWindowPos(Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
         var card = BuildCard(item);
 
         if (string.IsNullOrWhiteSpace(item.Source))
