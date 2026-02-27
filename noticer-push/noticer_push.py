@@ -139,8 +139,9 @@ def main() -> None:
             tool = hook.get("tool_name", "tool")
             tool_input = hook.get("tool_input") or {}
             command = tool_input.get("command") or tool_input.get("path") or str(tool_input)
-            title = tool
-            message = command
+            description = tool_input.get("description")
+            title = f"{tool}: {description}: {command}" if description else f"{tool}: {command}"
+            message = ""
             level = "info"
             args.transient = True
             args.slim = True
