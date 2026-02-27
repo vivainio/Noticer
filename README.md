@@ -8,6 +8,7 @@ A lightweight Windows notification overlay app. Receives notifications over UDP 
 - Notifications grouped by **source** under collapsible headers
 - Color-coded levels: `info`, `warn`, `error`, `success`
 - Pin mode 📌 — borderless always-on-top overlay, normal resizable window otherwise
+- Raises to foreground on new notification without stealing focus (when unpinned)
 - Draggable from the toolbar or any empty area
 - Tiny binary (~24 KB) — targets .NET Framework 4.8, pre-installed on Windows 10/11
 
@@ -59,6 +60,8 @@ send_notification("Job done", "Processed 1000 rows", level="success", source="ET
 ## Claude Code integration
 
 Noticer integrates with [Claude Code](https://github.com/anthropics/claude-code) hooks to show live activity — tool calls, permission requests, and completion notifications.
+
+Bash tool calls appear as slim transient cards showing the tool name, description, and command (e.g. `Bash: Build project: dotnet build`).
 
 Install hooks globally:
 
