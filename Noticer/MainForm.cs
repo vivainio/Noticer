@@ -210,12 +210,14 @@ public class MainForm : Form
 
     private void AddNotification(NotificationItem item)
     {
-        if (WindowState == FormWindowState.Minimized)
-            ShowWindow(Handle, SW_SHOWNOACTIVATE);
-        // Briefly go topmost then back — bypasses Windows foreground restrictions without stealing focus
-        SetWindowPos(Handle, HWND_TOPMOST,   0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         if (!TopMost)
-            SetWindowPos(Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        {
+            if (WindowState == FormWindowState.Minimized)
+                ShowWindow(Handle, SW_SHOWNOACTIVATE);
+            // Briefly go topmost then back — bypasses Windows foreground restrictions without stealing focus
+            SetWindowPos(Handle, HWND_TOPMOST,    0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            SetWindowPos(Handle, HWND_NOTOPMOST,  0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
 
         var card = BuildCard(item);
 
